@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+      "module": "commonjs",
+      "declaration": true,
+      "removeComments": true,
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "allowSyntheticDefaultImports": true,
+      "target": "es2017",
+      "sourceMap": true,
+      "outDir": "./dist",
+      "incremental": true,
+      "skipLibCheck": true,
+      "noImplicitAny": false,
+      "strictBindCallApply": false,
+      "forceConsistentCasingInFileNames": false,
+      "noFallthroughCasesInSwitch": false,
+      // * Allow 'import * as moment from "moment"' to 'import moment from "moment"'
+      "esModuleInterop": true,
+
+      // * strict * //
+      "strict": true,
+      "alwaysStrict": true,
+      "strictNullChecks": true,
+      "strictFunctionTypes": true,
+      "strictPropertyInitialization": true,
+
+      // * Alias * //
+      "baseUrl": ".",
+      "paths": {
+          "@class-validate/*": ["src/_common/validate/class-validator/*"]
+      }
+  }
+}
+
