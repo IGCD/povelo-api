@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PASSWORD_VALIDATION_FAILED, USER_NOT_FOUND } from 'src/errors/errors.constant';
+import { PASSWORD_VALIDATION_FAILED, REGIST_FAILED, USER_NOT_FOUND } from 'src/errors/errors.constant';
 import { PrismaService } from 'src/providers/prisma/prisma.service';
 import crypto from 'crypto';
 import { RegistDto } from './auth.dto';
@@ -18,13 +18,17 @@ export class AuthService {
     async regist(data: RegistDto) {
         const { email, password, phoneNumber } = data;
 
-        return await this.prisma.user.create({
-            data: {
-                email,
-                password: this.hasingPassword(password),
-                phoneNumber,
-            },
-        });
+        return await this.prisma.user
+            .create({
+                data: {
+                    email,
+                    password: this.hasingPassword(password),
+                    phoneNumber,
+                },
+            })
+            .catch((error) => {
+                throw new BadRequestException(REGIST_FAILED);
+            });
     }
 
     async userValidator(email: string, password: string) {
