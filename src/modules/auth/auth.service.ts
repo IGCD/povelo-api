@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PASSWORD_VALIDATION_FAILED, REGIST_FAILED, USER_NOT_FOUND } from 'src/errors/errors.constant';
-import { PrismaService } from 'src/providers/prisma/prisma.service';
 import crypto from 'crypto';
+import { LOGIN_FAILED, REGIST_FAILED } from 'src/errors/errors.constant';
+import { PrismaService } from 'src/providers/prisma/prisma.service';
 import { RegistDto } from './auth.dto';
 @Injectable()
 export class AuthService {
@@ -10,7 +10,9 @@ export class AuthService {
 
     async login(email: string, password: string) {
         //* Validate User
-        await this.userValidator(email, password);
+        await this.userValidator(email, password).catch((error) => {
+            throw new BadRequestException(LOGIN_FAILED);
+        });
 
         return true;
     }
@@ -33,16 +35,12 @@ export class AuthService {
 
     async userValidator(email: string, password: string) {
         //* Check is Valid User Email
-        const user = await this.prisma.user
-            .findUniqueOrThrow({
-                where: { email },
-            })
-            .catch((error) => {
-                throw new BadRequestException(USER_NOT_FOUND);
-            });
+        const user = await this.prisma.user.findUniqueOrThrow({
+            where: { email_password: { email, password } },
+        });
 
         //* Check Password is correct
-        if (user.password !== this.hasingPassword(password)) throw new BadRequestException(PASSWORD_VALIDATION_FAILED);
+        if (user.password !== this.hasingPassword(password)) throw new BadRequestException();
 
         return true;
     }
