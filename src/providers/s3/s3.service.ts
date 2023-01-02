@@ -8,13 +8,11 @@ export class S3Service {
     s3?: S3;
     constructor(private configService: ConfigService) {
         const config = this.configService.get<Configuration['s3']>('s3');
-        if (config?.accessKeyId) {
-            this.s3 = new S3({
-                accessKeyId: config.accessKeyId,
-                secretAccessKey: config.secretAccessKey,
-                region: config.region,
-            });
-        } else throw new BadRequestException('No S3 API key set');
+        this.s3 = new S3({
+            accessKeyId: config!.accessKeyId,
+            secretAccessKey: config!.secretAccessKey,
+            region: config!.region,
+        });
     }
 
     upload(name: string, body: Buffer, bucket?: string): Promise<S3.ManagedUpload.SendData> {
