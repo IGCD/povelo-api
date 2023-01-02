@@ -14,6 +14,9 @@ const configuration: Configuration = {
         secretAccessKey: cast('AWS_S3_SECRET_KEY', 'string'),
         region: cast('AWS_S3_REGION', 'string', 'ap-northeast-2'),
     },
+    jwt: {
+        secretKey: cast('JWT_SECRET_KEY', 'string'),
+    },
 };
 
 const configFunction: ConfigFactory<Configuration> = () => configuration;

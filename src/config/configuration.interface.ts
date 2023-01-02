@@ -7,4 +7,7 @@ export interface Configuration {
         secretAccessKey: string;
         region: string;
     };
+    jwt: {
+        secretKey: string;
+    };
 }
