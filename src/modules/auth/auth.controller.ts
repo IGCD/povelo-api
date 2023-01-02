@@ -3,7 +3,9 @@ import { user } from '@prisma/client';
 import { Expose } from 'src/providers/prisma/prisma.interface';
 import { LoginDto, RegistDto } from './auth.dto';
 import { AuthService } from './auth.service';
+import { Public } from './public.decorator';
 
+@Public()
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
