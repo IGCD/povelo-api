@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PASSWORD_VALIDATION_FAILED, USER_NOT_FOUND } from 'src/errors/errors.constant';
 import { PrismaService } from 'src/providers/prisma/prisma.service';
 import crypto from 'crypto';
+import { RegistDto } from './auth.dto';
 @Injectable()
 export class AuthService {
     constructor(private prisma: PrismaService, private configService: ConfigService) {}
@@ -12,6 +13,18 @@ export class AuthService {
         await this.userValidator(email, password);
 
         return true;
+    }
+
+    async regist(data: RegistDto) {
+        const { email, password, phoneNumber } = data;
+
+        return await this.prisma.user.create({
+            data: {
+                email,
+                password: this.hasingPassword(password),
+                phoneNumber,
+            },
+        });
     }
 
     async userValidator(email: string, password: string) {
