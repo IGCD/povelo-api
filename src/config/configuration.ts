@@ -15,7 +15,10 @@ const configuration: Configuration = {
         region: cast('AWS_S3_REGION', 'string', 'ap-northeast-2'),
     },
     jwt: {
-        secretKey: cast('JWT_SECRET_KEY', 'string'),
+        accessKey: cast('JWT_ACCESS_TOKEN_SECRET', 'string'),
+        accessExpiration: cast('JWT_ACCESS_TOKEN_EXPIRATION', 'string'),
+        refreshKey: cast('JWT_REFRESH_TOKEN_SECRET', 'string'),
+        refreshExpiration: cast('JWT_REFRESH_TOKEN_EXPIRATION', 'string'),
     },
 };
 

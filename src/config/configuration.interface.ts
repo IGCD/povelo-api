@@ -8,6 +8,9 @@ export interface Configuration {
         region: string;
     };
     jwt: {
-        secretKey: string;
+        accessKey: string;
+        accessExpiration: string;
+        refreshKey: string;
+        refreshExpiration: string;
     };
 }
