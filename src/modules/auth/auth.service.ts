@@ -10,15 +10,16 @@ import { RegistDto } from './auth.dto';
 export class AuthService {
     constructor(private prisma: PrismaService, private configService: ConfigService, private jwtService: JwtService) {}
     private config = this.configService.get<Configuration['jwt']>('jwt');
+
     async login(email: string, password: string) {
         //* Validate User
-        await this.userValidator(email, password).catch((error) => {
+        await this.authValidator(email, password).catch((error) => {
             throw new BadRequestException(LOGIN_FAILED);
         });
         const payload = { email };
 
         return {
-            access_token: this.jwtService.sign(payload, { secret: this.config?.secretKey, expiresIn: '600s' }),
+            access_token: this.jwtService.sign(payload, { secret: this.config?.accessKey, expiresIn: '600s' }),
         };
     }
 
@@ -38,7 +39,7 @@ export class AuthService {
             });
     }
 
-    async userValidator(email: string, password: string) {
+    async authValidator(email: string, password: string) {
         //* Check is Valid User Email
         const user = await this.prisma.user.findUniqueOrThrow({
             where: { email_password: { email, password: this.hasingPassword(password) } },
