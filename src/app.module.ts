@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import configuration from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
+import { JwtRefreshGuard } from './modules/auth/jwt-refresh.guard';
 import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './providers/prisma/prisma.module';
 import { S3Module } from './providers/s3/s3.module';
@@ -20,6 +21,10 @@ const imports = [AuthModule, PrismaModule, S3Module, UserModule];
         {
             provide: APP_GUARD,
             useClass: JwtAuthGuard,
+        },
+        {
+            provide: APP_GUARD,
+            useClass: JwtRefreshGuard,
         },
     ],
 })
