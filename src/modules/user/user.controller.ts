@@ -7,7 +7,7 @@ import { UserService } from './user.service';
 export class UserController {
     constructor(private userService: UserService) {}
     @Get(':userId')
-    async get(@Param('userCode', ParseIntPipe) userId: number): Promise<Expose<User>> {
+    async get(@Param('userId', ParseIntPipe) userId: number): Promise<Expose<User>> {
         return await this.userService.get(userId);
     }
 }

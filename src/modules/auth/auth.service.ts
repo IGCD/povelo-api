@@ -13,9 +13,7 @@ export class AuthService {
 
     async login(email: string, password: string) {
         //* Validate User
-        await this.authValidator(email, password).catch((error) => {
-            throw new BadRequestException(LOGIN_FAILED);
-        });
+        await this.authValidator(email, password);
         const payload = { email };
 
         return {
@@ -41,12 +39,13 @@ export class AuthService {
 
     async authValidator(email: string, password: string) {
         //* Check is Valid User Email
-        const user = await this.prisma.user.findUniqueOrThrow({
-            where: { email_password: { email, password: this.hasingPassword(password) } },
-        });
-
-        //* Check Password is correct
-        if (user.password !== this.hasingPassword(password)) throw new BadRequestException();
+        const user = await this.prisma.user
+            .findUniqueOrThrow({
+                where: { email_password: { email, password: this.hasingPassword(password) } },
+            })
+            .catch((error) => {
+                throw new BadRequestException(LOGIN_FAILED);
+            });
 
         return true;
     }
