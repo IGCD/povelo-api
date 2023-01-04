@@ -11,13 +11,15 @@ import { Public } from './public.decorator';
 @Public()
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService, private configService: ConfigService) {}
+    constructor(private authService: AuthService) {}
 
     @Post('login')
-    async login(@Body() data: LoginDto, @Res() res: Response) {
+    async login(@Body() data: LoginDto, @Res({ passthrough: true }) res: Response) {
         const { accessToken, accessOption, refreshToken, refreshOption, user } = await this.authService.login(data.email, data.password);
+
         res.cookie('accessToken', accessToken, accessOption);
         res.cookie('refreshToken', refreshToken, refreshOption);
+
         return user;
     }
 

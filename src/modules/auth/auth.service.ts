@@ -1,8 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import crypto from 'crypto';
+import { CookieOptions } from 'express';
 import { Configuration } from 'src/config/configuration.interface';
 import { LOGIN_FAILED, REGIST_FAILED, TOKEN_FAILED } from 'src/errors/errors.constant';
 import { PrismaService } from 'src/providers/prisma/prisma.service';
@@ -17,8 +19,10 @@ export class AuthService {
         //* Validate User
         const user = await this.authValidator(email, password);
 
-        const { accessToken, ...accessOption } = this.getCookieWithJwtAccessToken(user.id);
-        const { refreshToken, ...refreshOption } = this.getCookieWithJwtRefreshToken(user.id);
+        const { accessToken, accessOption } = this.getCookieWithJwtAccessToken(user.id);
+        const { refreshToken, refreshOption } = this.getCookieWithJwtRefreshToken(user.id);
+
+        this.prisma.expose<User>(user);
 
         await this.setCurrentRefreshToken(refreshToken, user.id);
 
@@ -64,11 +68,15 @@ export class AuthService {
             secret: this.config!.accessKey,
             expiresIn: this.config!.accessExpiration + 's',
         });
-        return {
-            accessToken: token,
+
+        const accessOption: CookieOptions = {
             maxAge: Number(this.config!.accessExpiration) * 1000,
             httpOnly: true,
             secure: true,
+        };
+        return {
+            accessToken: token,
+            accessOption,
         };
     }
     getCookieWithJwtRefreshToken(id: number) {
@@ -77,11 +85,16 @@ export class AuthService {
             secret: this.config!.refreshKey,
             expiresIn: this.config!.refreshExpiration + 's',
         });
-        return {
-            refreshToken: token,
+
+        const refreshOption: CookieOptions = {
             maxAge: Number(this.config!.refreshExpiration) * 1000,
             httpOnly: true,
             secure: true,
+        };
+
+        return {
+            refreshToken: token,
+            refreshOption,
         };
     }
 
