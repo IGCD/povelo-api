@@ -61,12 +61,12 @@ export class AuthService {
     getCookieWithJwtAccessToken(id: number) {
         const payload = { id };
         const token = this.jwtService.sign(payload, {
-            secret: this.configService.get<Configuration['jwt']['accessKey']>('jwt.accessKey'),
-            expiresIn: `${this.configService.get<Configuration['jwt']['accessExpiration']>('jwt.accessExpiration')}s`,
+            secret: this.config!.accessKey,
+            expiresIn: this.config!.accessExpiration + 's',
         });
         return {
             accessToken: token,
-            maxAge: Number(this.configService.get<Configuration['jwt']['accessExpiration']>('jwt.accessExpiration')) ?? '',
+            maxAge: Number(this.config!.accessExpiration) * 1000,
             httpOnly: true,
             secure: true,
         };
@@ -74,12 +74,12 @@ export class AuthService {
     getCookieWithJwtRefreshToken(id: number) {
         const payload = { id };
         const token = this.jwtService.sign(payload, {
-            secret: this.configService.get<Configuration['jwt']['refreshKey']>('jwt.refreshKey'),
-            expiresIn: `${this.configService.get<Configuration['jwt']['refreshExpiration']>('jwt.refreshExpiration')}s`,
+            secret: this.config!.refreshKey,
+            expiresIn: this.config!.refreshExpiration + 's',
         });
         return {
             refreshToken: token,
-            maxAge: Number(this.configService.get<Configuration['jwt']['refreshExpiration']>('jwt.refreshExpiration')) * 1000,
+            maxAge: Number(this.config!.refreshExpiration) * 1000,
             httpOnly: true,
             secure: true,
         };
