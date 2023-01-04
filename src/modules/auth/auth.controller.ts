@@ -1,8 +1,6 @@
 import { Body, Controller, Post, Res } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
-import { CookieOptions, Response } from 'express';
-import { Configuration } from 'src/config/configuration.interface';
+import { Response } from 'express';
 import { Expose } from 'src/providers/prisma/prisma.interface';
 import { LoginDto, RegistDto } from './auth.dto';
 import { AuthService } from './auth.service';
