@@ -1,9 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { UserService } from './user.service';
 
-@Controller()
+@Controller('users')
 export class UserController {
-    @Get('dd')
-    async test() {
-        return 'ss';
+    constructor(private userService: UserService) {}
+    @Get(':userId')
+    async get(@Param('userCode', ParseIntPipe) userId: number) {
+        return await this.userService.get(userId);
     }
 }

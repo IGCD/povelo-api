@@ -6,10 +6,11 @@ import { PrismaService } from 'src/providers/prisma/prisma.service';
 @Injectable()
 export class UserService {
     constructor(private prisma: PrismaService) {}
-    async getOne(where: Prisma.userWhereUniqueInput) {
+
+    async get(id: number) {
         return await this.prisma.user
             .findUniqueOrThrow({
-                where,
+                where: { id },
             })
             .catch(() => {
                 throw new BadRequestException(USER_NOT_FOUND);

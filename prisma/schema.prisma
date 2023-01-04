@@ -9,7 +9,8 @@ datasource db {
 }
 
 model user {
-  email        String    @id @unique(map: "unique__email") @db.VarChar(255)
+  id           Int       @id @default(autoincrement())
+  email        String    @unique(map: "unique__email") @db.VarChar(255)
   password     String    @db.VarChar(255)
   phoneNumber  String?   @unique(map: "unique__phoneNumber") @db.VarChar(255)
   refreshToken String?   @db.VarChar(255)
