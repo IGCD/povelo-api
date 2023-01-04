@@ -21,9 +21,6 @@ export class AuthService {
 
         const { accessToken, accessOption } = this.getCookieWithJwtAccessToken(user.id);
         const { refreshToken, refreshOption } = this.getCookieWithJwtRefreshToken(user.id);
-
-        this.prisma.expose<User>(user);
-
         await this.setCurrentRefreshToken(refreshToken, user.id);
 
         return {
@@ -31,7 +28,7 @@ export class AuthService {
             accessOption,
             refreshToken,
             refreshOption,
-            user,
+            user: this.prisma.expose<User>(user),
         };
     }
 

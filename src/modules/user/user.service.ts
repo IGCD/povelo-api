@@ -15,6 +15,6 @@ export class UserService {
             .catch(() => {
                 throw new BadRequestException(USER_NOT_FOUND);
             });
-        return this.prisma.expose<User>(user);
+        return user;
     }
 }
