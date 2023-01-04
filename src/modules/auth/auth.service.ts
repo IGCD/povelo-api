@@ -66,11 +66,11 @@ export class AuthService {
         const payload = { id };
         const token = this.jwtService.sign(payload, {
             secret: this.config!.accessKey,
-            expiresIn: this.config!.accessExpiration + 's',
+            expiresIn: this.config!.accessExpiration,
         });
 
         const accessOption: CookieOptions = {
-            maxAge: Number(this.config!.accessExpiration) * 1000,
+            maxAge: parseInt(this.config!.accessExpiration) * 60 * 1000,
             httpOnly: true,
             secure: true,
         };
@@ -83,11 +83,11 @@ export class AuthService {
         const payload = { id };
         const token = this.jwtService.sign(payload, {
             secret: this.config!.refreshKey,
-            expiresIn: this.config!.refreshExpiration + 's',
+            expiresIn: this.config!.refreshExpiration,
         });
 
         const refreshOption: CookieOptions = {
-            maxAge: Number(this.config!.refreshExpiration) * 1000,
+            maxAge: parseInt(this.config!.refreshExpiration) * 60 * 1000,
             httpOnly: true,
             secure: true,
         };
