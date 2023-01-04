@@ -1,5 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
+import { CookieOptions, Response } from 'express';
+import { Configuration } from 'src/config/configuration.interface';
 import { Expose } from 'src/providers/prisma/prisma.interface';
 import { LoginDto, RegistDto } from './auth.dto';
 import { AuthService } from './auth.service';
@@ -8,11 +11,14 @@ import { Public } from './public.decorator';
 @Public()
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) {}
+    constructor(private authService: AuthService, private configService: ConfigService) {}
 
     @Post('login')
-    async login(@Body() data: LoginDto) {
-        return await this.authService.login(data.email, data.password);
+    async login(@Body() data: LoginDto, @Res() res: Response) {
+        const { accessToken, accessOption, refreshToken, refreshOption, user } = await this.authService.login(data.email, data.password);
+        res.cookie('accessToken', accessToken, accessOption);
+        res.cookie('refreshToken', refreshToken, refreshOption);
+        return user;
     }
 
     @Post('regist')
