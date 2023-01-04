@@ -9,7 +9,7 @@ import { JwtPayload } from './jwt-payload.interface';
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(configService: ConfigService) {
         super({
-            jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => req.cookies.refreshToken]),
+            jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => req.cookies.accessToken]),
             ignoreExpiration: false,
             secretOrKey: configService.get<Configuration['jwt']>('jwt')?.accessKey,
         });

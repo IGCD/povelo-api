@@ -12,13 +12,12 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh-
     constructor(private configService: ConfigService, private authService: AuthService) {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([(req) => req.cookies.refreshToken]),
-            secretOrKey: configService.get<Configuration['jwt']>('jwt')?.refreshKey,
+            secretOrKey: configService.get<Configuration['jwt']>('jwt')!.refreshKey,
             passReqToCallback: true,
         });
     }
 
     async validate(req: Request, payload: JwtPayload) {
-        const refreshToken = req.cookies.refreshToken;
-        return this.authService.matchRefreshToken(refreshToken, payload.id);
+        return this.authService.matchRefreshToken(req.cookies.refreshToken, payload.id);
     }
 }

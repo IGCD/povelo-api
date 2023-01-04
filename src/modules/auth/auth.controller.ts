@@ -27,4 +27,11 @@ export class AuthController {
     async regist(@Body() data: RegistDto): Promise<Expose<User>> {
         return await this.authService.regist(data);
     }
+
+    @Post('logout')
+    async logout(@Res() res: Response) {
+        res.clearCookie('accessToken');
+        res.clearCookie('refreshToken');
+        return true;
+    }
 }
