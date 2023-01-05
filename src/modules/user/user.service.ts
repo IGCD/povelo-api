@@ -1,7 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { compare, hash } from 'bcrypt';
-import { TOKEN_FAILED, USER_NOT_FOUND } from 'src/errors/errors.constant';
+import { USER_NOT_FOUND } from 'src/errors/errors.constant';
 import { PrismaService } from 'src/providers/prisma/prisma.service';
 @Injectable()
 export class UserService {
@@ -12,9 +10,10 @@ export class UserService {
             .findUniqueOrThrow({
                 where: { id },
             })
-            .catch(() => {
+            .catch((error) => {
                 throw new BadRequestException(USER_NOT_FOUND);
             });
+
         return user;
     }
 }

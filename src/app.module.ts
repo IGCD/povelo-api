@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import configuration from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
-import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
+import { JwtAuthGuard } from './modules/auth/jwt.guard';
 import { JwtRefreshGuard } from './modules/auth/jwt-refresh.guard';
 import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './providers/prisma/prisma.module';

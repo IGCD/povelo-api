@@ -18,6 +18,6 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh-
     }
 
     async validate(req: Request, payload: JwtPayload) {
-        return this.authService.matchRefreshToken(req.cookies.refreshToken, payload.id);
+        return await this.authService.matchRefreshToken(req.cookies.refreshToken, payload.id);
     }
 }

@@ -18,17 +18,17 @@ export class AuthService {
     async login(email: string, password: string) {
         //* Validate User
         const user = await this.authValidator(email, password);
-
         const { accessToken, accessOption } = this.getCookieWithJwtAccessToken(user.id);
         const { refreshToken, refreshOption } = this.getCookieWithJwtRefreshToken(user.id);
-        await this.setCurrentRefreshToken(refreshToken, user.id);
+
+        this.setCurrentRefreshToken(refreshToken, user.id);
 
         return {
             accessToken,
             accessOption,
             refreshToken,
             refreshOption,
-            user: this.prisma.expose<User>(user),
+            user,
         };
     }
 
@@ -50,13 +50,14 @@ export class AuthService {
 
     async authValidator(email: string, password: string) {
         //* Check is Valid User Email
-        return await this.prisma.user
+        const user = await this.prisma.user
             .findUniqueOrThrow({
                 where: { email_password: { email, password: this.hasingPassword(password) } },
             })
             .catch((error) => {
                 throw new BadRequestException(LOGIN_FAILED);
             });
+        return this.prisma.expose<User>(user);
     }
 
     getCookieWithJwtAccessToken(id: number) {
@@ -105,14 +106,19 @@ export class AuthService {
                 refreshToken: hashedToken,
             },
         });
+
+        return hashedToken;
     }
 
     async matchRefreshToken(refreshToken: string, id: number) {
         const user = await this.userService.get(id);
 
-        return await compare(refreshToken, user.refreshToken ?? '').catch((error) => {
+        const isMatched = await compare(refreshToken, user.refreshToken ?? '').catch((error) => {
             throw new BadRequestException(TOKEN_FAILED);
         });
+        if (isMatched) return this.prisma.expose<User>(user);
+
+        return;
     }
 
     async removeRefreshToken(id: number) {
