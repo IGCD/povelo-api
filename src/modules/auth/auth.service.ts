@@ -2,11 +2,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { compare, hash } from 'bcrypt';
-import crypto from 'crypto';
 import { CookieOptions } from 'express';
 import { Configuration } from 'src/config/configuration.interface';
-import { LOGIN_FAILED, REGIST_FAILED, TOKEN_FAILED } from 'src/errors/errors.constant';
+import { BAD_REQEUST_REGIST, BAD_REQUEST_LOGIN } from 'src/errors/errors.constant';
+import { compare, encrypt } from 'src/helper/encrypt';
 import { PrismaService } from 'src/providers/prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { RegistDto } from './auth.dto';
@@ -39,12 +38,12 @@ export class AuthService {
             .create({
                 data: {
                     email,
-                    password: this.hasingPassword(password),
+                    password: encrypt(password),
                     phoneNumber,
                 },
             })
             .catch((error) => {
-                throw new BadRequestException(REGIST_FAILED);
+                throw new BadRequestException(BAD_REQEUST_REGIST);
             });
     }
 
@@ -52,10 +51,10 @@ export class AuthService {
         //* Check is Valid User Email
         const user = await this.prisma.user
             .findUniqueOrThrow({
-                where: { email_password: { email, password: this.hasingPassword(password) } },
+                where: { email_password: { email, password: encrypt(password) } },
             })
             .catch((error) => {
-                throw new BadRequestException(LOGIN_FAILED);
+                throw new BadRequestException(BAD_REQUEST_LOGIN);
             });
         return this.prisma.expose<User>(user);
     }
@@ -96,29 +95,19 @@ export class AuthService {
         };
     }
 
-    async setCurrentRefreshToken(refreshToken: string, id: number) {
-        const hashedToken = await hash(refreshToken, 10);
-        await this.prisma.user.update({
-            where: {
-                id,
-            },
-            data: {
-                refreshToken: hashedToken,
-            },
+    async setCurrentRefreshToken(rT: string, id: number) {
+        const { refreshToken } = await this.prisma.user.update({
+            where: { id },
+            data: { refreshToken: encrypt(rT) },
         });
 
-        return hashedToken;
+        return refreshToken;
     }
 
-    async matchRefreshToken(refreshToken: string, id: number) {
+    async matchRefreshToken(token: string, id: number) {
         const user = await this.userService.get(id);
-
-        const isMatched = await compare(refreshToken, user.refreshToken ?? '').catch((error) => {
-            throw new BadRequestException(TOKEN_FAILED);
-        });
-        if (isMatched) return this.prisma.expose<User>(user);
-
-        return;
+        compare(token, user.refreshToken ?? '');
+        return this.prisma.expose<User>(user);
     }
 
     async removeRefreshToken(id: number) {
@@ -126,11 +115,5 @@ export class AuthService {
             where: { id },
             data: { refreshToken: null },
         });
-    }
-
-    hasingPassword(password: string) {
-        const salt = this.configService.get('salt');
-
-        return crypto.createHmac('sha256', salt).update(password).digest('hex');
     }
 }
