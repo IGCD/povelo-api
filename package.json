@@ -35,11 +35,13 @@
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.3",
     "dotenv-expand": "^10.0.0",
+    "nest-winston": "^1.8.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "prisma": "^4.8.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "winston": "^3.8.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
