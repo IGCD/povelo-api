@@ -1,5 +1,5 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { ENV_NOT_FOUND } from 'src/errors/errors.constant';
+import { NOT_FOUND_ENV } from 'src/errors/errors.constant';
 
 const number = (value: string): number | undefined => (isNaN(parseInt(value)) ? undefined : parseInt(value));
 const string = (value: string): string => value;
@@ -19,6 +19,6 @@ export const cast: CaseFunctionType = (key, type, defaultValue?) => {
         const result = typeConverter[type](value);
         return result;
     } else {
-        throw new UnauthorizedException(`${ENV_NOT_FOUND}(${key})`);
+        throw new UnauthorizedException(`${NOT_FOUND_ENV}(${key})`);
     }
 };
