@@ -14,11 +14,13 @@ const configuration: Configuration = {
         secretAccessKey: cast('AWS_S3_SECRET_KEY', 'string'),
         region: cast('AWS_S3_REGION', 'string', 'ap-northeast-2'),
     },
-    jwt: {
-        accessKey: cast('JWT_ACCESS_TOKEN_SECRET', 'string'),
-        accessExpiration: cast('JWT_ACCESS_TOKEN_EXPIRATION', 'string'),
-        refreshKey: cast('JWT_REFRESH_TOKEN_SECRET', 'string'),
-        refreshExpiration: cast('JWT_REFRESH_TOKEN_EXPIRATION', 'string'),
+    security: {
+        jwt: {
+            accessSecret: cast('JWT_ACCESS_TOKEN_SECRET', 'string'),
+            accessExpiry: cast('JWT_ACCESS_TOKEN_EXPIRATION', 'string'),
+            refreshSecret: cast('JWT_REFRESH_TOKEN_SECRET', 'string'),
+            refreshExpiry: cast('JWT_REFRESH_TOKEN_EXPIRATION', 'string'),
+        },
     },
 };
 

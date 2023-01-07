@@ -7,10 +7,12 @@ export interface Configuration {
         secretAccessKey: string;
         region: string;
     };
-    jwt: {
-        accessKey: string;
-        accessExpiration: string;
-        refreshKey: string;
-        refreshExpiration: string;
+    security: {
+        jwt: {
+            accessSecret: string;
+            accessExpiry: string;
+            refreshSecret: string;
+            refreshExpiry: string;
+        };
     };
 }
