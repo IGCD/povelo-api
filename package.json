@@ -35,6 +35,7 @@
     "dotenv": "^16.0.3",
     "dotenv-expand": "^10.0.0",
     "nest-winston": "^1.8.0",
+    "normalize-email": "^1.1.1",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "prisma": "^4.8.0",
