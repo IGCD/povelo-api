@@ -1,6 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 import crypto from 'crypto';
-import { UNAUTHORIZED_TOKEN } from 'src/errors/errors.constant';
+import { INVALID_TOKEN } from 'src/errors/errors.constant';
 
 export const encrypt = (str: string): string => {
     const salt = process.env.SALT ?? '';
@@ -11,5 +11,5 @@ export const encrypt = (str: string): string => {
 export const compare = (plain: string, hashed: string) => {
     if (encrypt(plain) === hashed) return true;
 
-    throw new UnauthorizedException(UNAUTHORIZED_TOKEN);
+    throw new UnauthorizedException(INVALID_TOKEN);
 };

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { NOT_FOUND_POST } from 'src/errors/errors.constant';
+import { POST_NOT_FOUND } from 'src/errors/errors.constant';
 import { PrismaService } from 'src/providers/prisma/prisma.service';
 import { CreatePostDto } from './post.dto';
 
@@ -15,7 +15,7 @@ export class PostService {
 
     async getPosts() {
         return await this.prisma.post.findMany({}).catch((error) => {
-            throw new BadRequestException(NOT_FOUND_POST);
+            throw new BadRequestException(POST_NOT_FOUND);
         });
     }
 
@@ -25,7 +25,7 @@ export class PostService {
                 where: { id },
             })
             .catch((error) => {
-                throw new BadRequestException(NOT_FOUND_POST);
+                throw new BadRequestException(POST_NOT_FOUND);
             });
     }
 }
