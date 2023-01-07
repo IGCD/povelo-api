@@ -1,119 +1,107 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { CookieOptions } from 'express';
 import { Configuration } from 'src/config/configuration.interface';
-import { BAD_REQEUST_REGIST, BAD_REQUEST_LOGIN } from 'src/errors/errors.constant';
-import { compare, encrypt } from 'src/helper/encrypt';
+import { EMAIL_USER_CONFLICT, INVALID_LOGIN, PHONE_USER_CONFLICT, SESSION_NOT_FOUND } from 'src/errors/errors.constant';
+import { encrypt } from 'src/helper/encrypt';
+import { safeEmail } from 'src/helper/safe-email';
 import { PrismaService } from 'src/providers/prisma/prisma.service';
-import { UserService } from '../user/user.service';
+import { TokenService } from 'src/providers/token/token.service';
 import { RegistDto } from './auth.dto';
+import { JwtPayload } from './auth.interface';
 @Injectable()
 export class AuthService {
-    constructor(private prisma: PrismaService, private configService: ConfigService, private jwtService: JwtService, private userService: UserService) {}
-    private config = this.configService.get<Configuration['jwt']>('jwt');
+    private config = this.configService.get<Configuration['security']>('security');
+    constructor(private prisma: PrismaService, private configService: ConfigService, private tokenService: TokenService) {}
 
     async login(email: string, password: string) {
         //* Validate User
-        const user = await this.authValidator(email, password);
-        const { accessToken, accessOption } = this.getCookieWithJwtAccessToken(user.id);
-        const { refreshToken, refreshOption } = this.getCookieWithJwtRefreshToken(user.id);
+        const user = await this.loginValidator(email, password);
 
-        this.setCurrentRefreshToken(refreshToken, user.id);
+        const accessToken = this.getSignedAccessToken({ userId: user.id });
+        const refreshToken = this.getSignedRefreshToken({ userId: user.id });
+
+        //* Save Refresh into Session
+        await this.prisma.session.create({
+            data: {
+                token: refreshToken,
+                user: { connect: { id: user.id } },
+            },
+        });
 
         return {
             accessToken,
-            accessOption,
-            refreshToken,
-            refreshOption,
             user,
         };
     }
 
     async regist(data: RegistDto) {
-        const { email, password, phoneNumber } = data;
+        const { email, password, phoneNumber, name } = data;
+        const emailSafe = safeEmail(email);
+        await this.registValidator(emailSafe, phoneNumber);
 
-        return await this.prisma.user
-            .create({
-                data: {
-                    email,
-                    password: encrypt(password),
-                    phoneNumber,
-                },
-            })
-            .catch((error) => {
-                throw new BadRequestException(BAD_REQEUST_REGIST);
-            });
+        return await this.prisma.user.create({
+            data: {
+                name,
+                phoneNumber,
+                emails: { create: { email: emailSafe, password: encrypt(password) } },
+            },
+        });
     }
 
-    async authValidator(email: string, password: string) {
-        //* Check is Valid User Email
-        const user = await this.prisma.user
-            .findUniqueOrThrow({
-                where: { email_password: { email, password: encrypt(password) } },
-            })
-            .catch((error) => {
-                throw new BadRequestException(BAD_REQUEST_LOGIN);
-            });
+    async logout(userId: number) {
+        const session = await this.prisma.session.findFirst({
+            where: { userId },
+            select: { id: true, user: { select: { id: true } } },
+        });
+        if (!session) throw new NotFoundException(SESSION_NOT_FOUND);
+
+        const deletion = await this.prisma.session.delete({ where: { id: session.id } });
+        return { success: true };
+    }
+
+    async refresh(payload: JwtPayload) {
+        const { userId } = payload;
+
+        const session = await this.prisma.session.findFirst({ where: { userId } });
+        if (!session) throw new NotFoundException(SESSION_NOT_FOUND);
+
+        return this.getSignedAccessToken(payload);
+    }
+
+    async loginValidator(email: string, password: string) {
+        const emailSafe = safeEmail(email);
+
+        const user = await this.prisma.user.findFirst({
+            where: { emails: { some: { email: emailSafe, password: encrypt(password) } } },
+        });
+
+        if (!user) throw new BadRequestException(INVALID_LOGIN);
+
         return this.prisma.expose<User>(user);
     }
 
-    getCookieWithJwtAccessToken(id: number) {
-        const payload = { id };
-        const token = this.jwtService.sign(payload, {
-            secret: this.config!.accessKey,
-            expiresIn: this.config!.accessExpiration,
-        });
+    async registValidator(email: string, phoneNumber: string) {
+        const existEmail = await this.prisma.email.findUnique({ where: { email } });
+        const existPhone = await this.prisma.user.findUnique({ where: { phoneNumber } });
 
-        const accessOption: CookieOptions = {
-            maxAge: parseInt(this.config!.accessExpiration) * 60 * 1000,
-            httpOnly: true,
-            secure: true,
-        };
-        return {
-            accessToken: token,
-            accessOption,
-        };
-    }
-    getCookieWithJwtRefreshToken(id: number) {
-        const payload = { id };
-        const token = this.jwtService.sign(payload, {
-            secret: this.config!.refreshKey,
-            expiresIn: this.config!.refreshExpiration,
-        });
+        if (existEmail) throw new ConflictException(EMAIL_USER_CONFLICT);
+        if (existPhone) throw new ConflictException(PHONE_USER_CONFLICT);
 
-        const refreshOption: CookieOptions = {
-            maxAge: parseInt(this.config!.refreshExpiration) * 60 * 1000,
-            httpOnly: true,
-            secure: true,
-        };
-
-        return {
-            refreshToken: token,
-            refreshOption,
-        };
+        return;
     }
 
-    async setCurrentRefreshToken(rT: string, id: number) {
-        const { refreshToken } = await this.prisma.user.update({
-            where: { id },
-            data: { refreshToken: encrypt(rT) },
-        });
+    getSignedAccessToken(payload: JwtPayload) {
+        const expiresIn = this.config?.jwt.accessExpiry!;
+        const token = this.tokenService.signJwt(payload, expiresIn);
 
-        return refreshToken;
+        return token;
     }
 
-    async matchRefreshToken(token: string, id: number) {
-        const user = await this.userService.get(id);
-        compare(token, user.refreshToken ?? '');
-        return this.prisma.expose<User>(user);
-    }
+    getSignedRefreshToken(payload: JwtPayload) {
+        const expiresIn = this.config?.jwt.refreshExpiry!;
+        const token = this.tokenService.signJwt(payload, expiresIn);
 
-    async removeRefreshToken(id: number) {
-        return this.prisma.user.update({
-            where: { id },
-            data: { refreshToken: null },
-        });
+        return token;
     }
 }
