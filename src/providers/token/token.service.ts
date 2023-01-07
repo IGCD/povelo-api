@@ -12,7 +12,7 @@ export class TokenService {
 
     signJwt(payload: JwtPayload, expiresIn: string) {
         return this.jwtService.sign(payload, {
-            secret: this.config?.accessSecret,
+            secret: this.config?.secret,
             expiresIn,
         });
     }
@@ -20,7 +20,7 @@ export class TokenService {
     verify(token: string) {
         try {
             return this.jwtService.verify(token, {
-                secret: this.config?.accessSecret,
+                secret: this.config?.secret,
             });
         } catch (error) {
             throw new UnauthorizedException(INVALID_TOKEN);

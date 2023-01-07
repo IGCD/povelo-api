@@ -9,9 +9,8 @@ export interface Configuration {
     };
     security: {
         jwt: {
-            accessSecret: string;
+            secret: string;
             accessExpiry: string;
-            refreshSecret: string;
             refreshExpiry: string;
         };
     };

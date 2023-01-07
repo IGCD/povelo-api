@@ -16,9 +16,8 @@ const configuration: Configuration = {
     },
     security: {
         jwt: {
-            accessSecret: cast('JWT_ACCESS_TOKEN_SECRET', 'string'),
+            secret: cast('JWT_ACCESS_TOKEN_SECRET', 'string'),
             accessExpiry: cast('JWT_ACCESS_TOKEN_EXPIRATION', 'string'),
-            refreshSecret: cast('JWT_REFRESH_TOKEN_SECRET', 'string'),
             refreshExpiry: cast('JWT_REFRESH_TOKEN_EXPIRATION', 'string'),
         },
     },
