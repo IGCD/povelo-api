@@ -8,19 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Email {
-  id        Int       @id @default(autoincrement())
-  userId    Int?
-  email     String    @unique @db.VarChar(255)
-  password  String?   @db.VarChar(255)
-  createdAt DateTime  @default(now()) @db.DateTime(0)
-  updatedAt DateTime? @db.DateTime(0)
-  user      User?     @relation("userEmail", fields: [userId], references: [id])
-
-  @@unique([email, password])
-  @@index([userId], name: "userId")
-}
-
 model Post {
   id        Int       @id @default(autoincrement())
   userId    Int?
@@ -37,24 +24,26 @@ model Post {
 
 model Session {
   id        Int       @id @default(autoincrement())
-  userId    Int?
+  userId    Int?      @unique(map: "foreign__session_userId")
   token     String?   @db.VarChar(255)
   createdAt DateTime  @default(now())
   updatedAt DateTime? @db.DateTime(0)
-  user      User?     @relation("userSession", fields: [userId], references: [id])
+  user      User?     @relation("userSession", fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId], name: "userId")
+  @@index([userId], map: "userId")
 }
 
 model User {
   id                Int       @id @default(autoincrement())
   name              String    @db.VarChar(255)
+  email             String?   @unique(map: "User_email") @db.VarChar(255)
+  password          String?   @db.VarChar(255)
   profilePictureUrl String?   @db.VarChar(255)
-  phoneNumber       String?   @unique(map: "unique__user_phoneNumber") @db.VarChar(255)
-  subPhoneNumber    String?   @db.VarChar(255)
+  phoneNumber       String?   @unique(map: "User_phoneNumber") @db.VarChar(255)
   createdAt         DateTime  @default(now()) @db.DateTime(0)
   updatedAt         DateTime? @db.DateTime(0)
-  emails            Email[]   @relation("userEmail")
   posts             Post[]    @relation("userPost")
-  sessions          Session[] @relation("userSession")
+  sessions          Session?  @relation("userSession")
+
+  @@unique([email, password], map: "User_email_password")
 }
