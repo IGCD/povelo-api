@@ -1,5 +1,5 @@
 import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common';
-import { Email, PrismaClient, Session, User } from '@prisma/client';
+import { PrismaClient, Session, User } from '@prisma/client';
 import { Expose } from './prisma.interface';
 
 const prisma = new PrismaClient();
@@ -29,9 +29,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     expose<T>(item: T): Expose<T> {
         if (!item) return {} as T;
 
-        if ((item as any as Partial<Email>).password) (item as any).hasPasword = true;
+        if ((item as any as Partial<User>).password) (item as any).hasPasword = true;
 
-        delete (item as any as Partial<Email>).password;
+        delete (item as any as Partial<User>).password;
         delete (item as any as Partial<Session>).token;
         delete (item as any as Partial<User>).phoneNumber;
 

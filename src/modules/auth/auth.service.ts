@@ -11,8 +11,8 @@ import { RegistDto } from './auth.dto';
 import { JwtPayload } from './auth.interface';
 @Injectable()
 export class AuthService {
-    private config = this.configService.get<Configuration['security']>('security');
     constructor(private prisma: PrismaService, private configService: ConfigService, private tokenService: TokenService) {}
+    private config = this.configService.get<Configuration['security']>('security');
 
     async login(email: string, password: string) {
         //* Validate User
@@ -44,7 +44,8 @@ export class AuthService {
             data: {
                 name,
                 phoneNumber,
-                emails: { create: { email: emailSafe, password: encrypt(password) } },
+                email,
+                password: encrypt(password),
             },
         });
     }
@@ -72,21 +73,23 @@ export class AuthService {
     async loginValidator(email: string, password: string) {
         const emailSafe = safeEmail(email);
 
-        const user = await this.prisma.user.findFirst({
-            where: { emails: { some: { email: emailSafe, password: encrypt(password) } } },
-        });
-
-        if (!user) throw new BadRequestException(INVALID_LOGIN);
+        const user = await this.prisma.user
+            .findUniqueOrThrow({
+                where: { email_password: { email: emailSafe, password: encrypt(password) } },
+            })
+            .catch((error) => {
+                throw new BadRequestException(INVALID_LOGIN);
+            });
 
         return this.prisma.expose<User>(user);
     }
 
     async registValidator(email: string, phoneNumber: string) {
-        const existEmail = await this.prisma.email.findUnique({ where: { email } });
-        const existPhone = await this.prisma.user.findUnique({ where: { phoneNumber } });
+        const userEmail = await this.prisma.user.findUnique({ where: { email: safeEmail(email) } });
+        if (userEmail) throw new ConflictException(EMAIL_USER_CONFLICT);
 
-        if (existEmail) throw new ConflictException(EMAIL_USER_CONFLICT);
-        if (existPhone) throw new ConflictException(PHONE_USER_CONFLICT);
+        const userPhone = await this.prisma.user.findUnique({ where: { phoneNumber } });
+        if (userPhone) throw new ConflictException(PHONE_USER_CONFLICT);
 
         return;
     }

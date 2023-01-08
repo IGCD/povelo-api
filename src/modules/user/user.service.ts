@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { USER_NOT_FOUND } from 'src/errors/errors.constant';
 import { PrismaService } from 'src/providers/prisma/prisma.service';
 @Injectable()
@@ -14,6 +15,6 @@ export class UserService {
                 throw new BadRequestException(USER_NOT_FOUND);
             });
 
-        return user;
+        return this.prisma.expose<User>(user);
     }
 }

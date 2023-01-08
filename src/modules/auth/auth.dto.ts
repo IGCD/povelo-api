@@ -25,8 +25,4 @@ export class RegistDto {
     @IsString()
     @IsNotEmpty()
     phoneNumber!: string;
-
-    @IsString()
-    @IsOptional()
-    subPhoneNumber?: string;
 }
