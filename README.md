@@ -19,6 +19,7 @@ Typescript
 Nest.js
 
 ## Structure
+```bash
 .
 ├── dist                    # Compiled files
 ├── logs                    # Log files
@@ -34,7 +35,7 @@ Nest.js
 │   ├── app.module.ts       # Main module
 │   └── main.ts             # Bootstrap
 └── README.md
-
+```
 ## Installation
 
 ```bash
