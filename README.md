@@ -7,10 +7,33 @@
 
   <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
 
-
+# Povelo API
 ## Description
+개발자 포트폴리오 작성을 위한 서비스입니다. 이곳에서 여러분의 포트폴리오를 업데이트하고 배포하세요 !
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Environment
+Node: v18.12.1 (lts)
+npm: v8.19.2
+Prisma: 4.8.1
+Typescript
+Nest.js
+
+## Structure
+.
+├── dist                    # Compiled files
+├── logs                    # Log files
+├── docs                    # Documents (etc. README.md)
+├── prisma                  # Database Schema
+├── src                     # Source Files
+│   ├── config/             # Configuration env
+│   ├── errors/             # Error constants
+│   ├── helper/             # Helper functions
+│   ├── library/            # Helper classes
+│   ├── modules/            # Services
+│   ├── providers/          # Externally providers
+│   ├── app.module.ts       # Main module
+│   └── main.ts             # Bootstrap
+└── README.md
 
 ## Installation
 
