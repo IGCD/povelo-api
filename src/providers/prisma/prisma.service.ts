@@ -1,22 +1,32 @@
 import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common';
-import { PrismaClient, Session, User } from '@prisma/client';
+import { Prisma, PrismaClient, Session, User } from '@prisma/client';
+import { LoggerLibrary } from 'src/library/logger.library';
 import { Expose } from './prisma.interface';
 
-const prisma = new PrismaClient();
-
-prisma.$use(async (params, next) => {
-    const before = Date.now();
-    const result = await next(params);
-    const after = Date.now();
-
-    console.log(`Query ${params.model}.${params.action} took ${after - before}ms`);
-
-    return result;
-});
-
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit {
+export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel> implements OnModuleInit {
+    private readonly logger = new LoggerLibrary();
+
+    constructor() {
+        super({
+            log: [
+                { emit: 'event', level: 'query' },
+                { emit: 'event', level: 'error' },
+            ],
+        });
+    }
     async onModuleInit() {
+        this.$on('query', (e: Prisma.QueryEvent) => {
+            const format = `QUERY: ${e.query} || PARAMS: ${e.params} || DURATION: ${e.duration}`;
+            this.logger.queryLog(format);
+
+            //* For slow query, 2 seconds over
+            if (e.duration > 2000) this.logger.querySlow(format);
+        });
+        this.$on('error', (e: Prisma.LogEvent) => {
+            this.logger.queryError(`${e.message}`);
+        });
+
         await this.$connect();
     }
 
