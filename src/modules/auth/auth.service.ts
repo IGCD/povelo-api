@@ -22,17 +22,12 @@ export class AuthService {
         const refreshToken = this.getSignedRefreshToken({ userId: user.id });
 
         //* Save Refresh into Session
-        await this.prisma.session.create({
-            data: {
-                token: refreshToken,
-                user: { connect: { id: user.id } },
-            },
+        await this.prisma.session.update({
+            where: { userId: user.id },
+            data: { token: refreshToken },
         });
 
-        return {
-            accessToken,
-            user,
-        };
+        return { accessToken, user };
     }
 
     async regist(data: RegistDto) {
@@ -57,7 +52,7 @@ export class AuthService {
         });
         if (!session) throw new NotFoundException(SESSION_NOT_FOUND);
 
-        const deletion = await this.prisma.session.delete({ where: { id: session.id } });
+        await this.prisma.session.delete({ where: { id: session.id } });
         return { success: true };
     }
 
