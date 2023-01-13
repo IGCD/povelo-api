@@ -18,7 +18,7 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
     async onModuleInit() {
         this.$on('query', (e: Prisma.QueryEvent) => {
             const format = `QUERY: ${e.query} || PARAMS: ${e.params} || DURATION: ${e.duration}`;
-            this.logger.queryLog(format);
+            // this.logger.queryLog(format);
 
             //* For slow query, 2 seconds over
             if (e.duration > 2000) this.logger.querySlow(format);

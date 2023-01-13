@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import configuration from './config/configuration';
+import { LoggerMiddleware } from './middleware/logger.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/jwt.guard';
 import { UserModule } from './modules/user/user.module';
@@ -24,5 +25,9 @@ const imports = [AuthModule, PrismaModule, S3Module, UserModule, TokenModule];
         },
     ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(LoggerMiddleware).forRoutes('*');
+    }
+}
 
